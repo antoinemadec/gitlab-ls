@@ -34,12 +34,22 @@ class GitlabObject:
     ):
         text_edit = types.TextEdit(types.Range(start, end), self.url)
         return types.CompletionItem(
-            label=f"{'#' if is_issue else '!'}{self.id} {self.title}",
+            label=f"{'#' if is_issue else '!'}{self.id} ({self.state}) {self.title}",
             label_details=types.CompletionItemLabelDetails(detail=project.path),
             kind=(types.CompletionItemKind.Variable),
+            detail=self.title,
             documentation=self.description,
             text_edit=text_edit,
         )
+
+    def get_hover(self) -> types.MarkupContent:
+        documentation = f"""**{self.title}**
+---
+state: {self.state}
+author: {self.author}
+---
+{self.description}"""
+        return types.MarkupContent(kind=types.MarkupKind.Markdown, value=documentation)
 
 
 @dataclass_json
@@ -349,10 +359,7 @@ def hover(ls: GitlabLanguageServer, params: types.HoverParams):
         return
 
     return types.Hover(
-        contents=types.MarkupContent(
-            kind=types.MarkupKind.Markdown,
-            value=f"{gitlab_object.title}\n-----\n{gitlab_object.description}",
-        ),
+        contents=gitlab_object.get_hover(),
         range=types.Range(
             start=types.Position(line=pos.line, character=0),
             end=types.Position(line=pos.line + 1, character=0),
