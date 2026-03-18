@@ -5,13 +5,27 @@ Example with Neovim:
 
 `.config/nvim/lsp/gitlab-ls.lua`:
 ```lua
+local url = os.getenv("GITLAB_URL")
+local private_token = os.getenv("GITLAB_API_TOKEN")
+local projects = {}
+local projects_str = os.getenv("GITLAB_PROJECTS")
+if projects_str then
+  for proj in string.gmatch(projects_str, "[^ ]*") do
+    table.insert(projects, proj)
+  end
+end
+
+if not url or not private_token or #projects == 0 then
+  return {}
+end
+
 return {
-  cmd = { '/home/antoine/src/gitlab-ls/gitlab-ls.sh' },
+  cmd = { vim.fn.stdpath("data") .. '/lazy/gitlab-ls/gitlab-ls.sh' },
   filetypes = { 'txt', 'indentcolor' },
   init_options = {
-    url = os.getenv("GITLAB_URL"),
-    private_token = os.getenv("GITLAB_API_TOKEN"),
-    projects = { os.getenv("GITLAB_PROJECTS") },
+    url = url,
+    private_token = private_token,
+    projects = projects,
   },
 }
 
