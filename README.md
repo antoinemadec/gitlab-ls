@@ -28,6 +28,7 @@ return {
     projects = projects,
   },
 }
+```
 
 `init.lua`:
 ```lua
