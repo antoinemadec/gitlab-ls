@@ -82,7 +82,7 @@ class GitlabLanguageServer(LanguageServer):
     def init_gitlab(self, client: gitlab.Gitlab):
         self.client = client
         self.gitlab_url_regex = re.compile(
-            r"\b" + f"{self.client.url}" + r"/([^ ]+)/-/(issues|merge_requests)/(\d+)\b"
+            r"\b" + f"{self.client.url}" + r"/([^ ]+)/-/(issues|work_items|merge_requests)/(\d+)\b"
         )
 
     def get_gitlab_object_from_url_match(self, m: re.Match[str] | None) -> Optional[GitlabObject]:
@@ -92,7 +92,7 @@ class GitlabLanguageServer(LanguageServer):
         if project_path not in self.projects:
             return None
         project = self.projects[project_path]
-        is_issue = m.group(2) == "issues"
+        is_issue = m.group(2) == "issues" or m.group(2) == "work_items"
         iid = int(m.group(3))
         gitlab_objects = project.issues if is_issue else project.merge_requests
         if iid not in gitlab_objects:
